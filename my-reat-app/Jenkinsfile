@@ -1,36 +1,39 @@
 pipeline {
     agent any
+
     options {
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
     }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        stage('Install & Build') {
+
+        stage('Install & Lint & Build') {
+            agent {
+                docker {
+                    image 'node:22-alpine'
+                    reuseNode true
+                }
+            }
             steps {
-                dir('my-reat-app') {
-                    sh '''
-                        echo "Đang đứng tại thư mục: $PWD"
-                        # Kiểm tra xem Node đã có sẵn chưa
-                        node -v
-                        npm -v
-                        
-                        # Chạy trực tiếp, không dùng lệnh docker run
-                        npm ci
-                        npm run build
-                    '''
+                dir('my-react-app') {
+                    sh 'node -v && npm -v'
+                    sh 'npm install'
+                    sh 'npm run lint'
+                    sh 'npm run build'
                 }
             }
         }
     }
+
     post {
         success {
-            // Khi lưu Artifact, đường dẫn phải tính từ thư mục gốc của Git
-            archiveArtifacts artifacts: 'my-reat-app/dist/**/*', fingerprint: true, allowEmptyArchive: true
+            archiveArtifacts artifacts: 'my-react-app/dist/**/*', fingerprint: true, allowEmptyArchive: false
         }
         failure {
             echo 'Pipeline thất bại'
