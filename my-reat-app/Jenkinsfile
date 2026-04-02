@@ -12,14 +12,16 @@ pipeline {
         }
         stage('Install & Build') {
             steps {
-                // Chúng ta dùng dir('tên_thư_mục') để Jenkins nhảy vào đúng chỗ chứa package.json
                 dir('my-reat-app') {
                     sh '''
                         echo "Đang đứng tại thư mục: $PWD"
-                        ls -la
+                        # Kiểm tra xem Node đã có sẵn chưa
+                        node -v
+                        npm -v
                         
-                        docker run --rm -v $PWD:/app -w /app node:22-alpine \
-                        sh -c "npm ci && npm run build"
+                        # Chạy trực tiếp, không dùng lệnh docker run
+                        npm ci
+                        npm run build
                     '''
                 }
             }
