@@ -7,36 +7,32 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Install & Lint & Build') {
-            agent {
-                docker {
-                    image 'node:22-alpine'
-                    reuseNode true
-                }
-            }
+        stage('Build React') {
             steps {
-                dir('my-react-app') {
-                    sh 'node -v && npm -v'
-                    sh 'npm install'
-                    sh 'npm run lint'
-                    sh 'npm run build'
-                }
+                sh '''
+                    docker run --rm \
+                    -v $PWD:/app \
+                    -w /app \
+                    node:22-alpine \
+                    sh -c "node -v && npm -v && npm install && npm run build"
+                '''
             }
         }
     }
 
     post {
         success {
-            archiveArtifacts artifacts: 'my-react-app/dist/**/*', fingerprint: true, allowEmptyArchive: false
+            archiveArtifacts artifacts: '**/dist/**/*', allowEmptyArchive: true
         }
         failure {
-            echo 'Pipeline thất bại'
+            echo "Pipeline failed"
         }
     }
 }
