@@ -12,15 +12,22 @@ pipeline {
         }
         stage('Install & Build') {
             steps {
-                sh '''
-                    docker run --rm -v $PWD:/app -w /app node:22-alpine \
-                    sh -c "cd my-reat-app && npm ci && npm run build"
-                '''
+                // Chúng ta dùng dir('tên_thư_mục') để Jenkins nhảy vào đúng chỗ chứa package.json
+                dir('my-reat-app') {
+                    sh '''
+                        echo "Đang đứng tại thư mục: $PWD"
+                        ls -la
+                        
+                        docker run --rm -v $PWD:/app -w /app node:22-alpine \
+                        sh -c "npm ci && npm run build"
+                    '''
+                }
             }
         }
     }
     post {
         success {
+            // Khi lưu Artifact, đường dẫn phải tính từ thư mục gốc của Git
             archiveArtifacts artifacts: 'my-reat-app/dist/**/*', fingerprint: true, allowEmptyArchive: true
         }
         failure {
