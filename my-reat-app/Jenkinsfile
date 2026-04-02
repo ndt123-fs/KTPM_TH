@@ -3,7 +3,7 @@ pipeline {
     triggers {
         pollSCM('H/5 * * * *') // Kiểm tra mã nguồn mỗi 5 phút
     }
-
+// nguen duy tin
     options {
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
