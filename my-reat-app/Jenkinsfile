@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    triggers {
+        pollSCM('H/5 * * * *') // Kiểm tra mã nguồn mỗi 5 phút
+    }
 
     options {
         timeout(time: 30, unit: 'MINUTES')
